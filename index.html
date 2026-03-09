@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>ACRONAME</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --pink: #ff5eac;
+    --purple: #8b5cf6;
+    --blue: #3b82f6;
+    --cyan: #06d6a0;
+    --yellow: #ffd166;
+    --orange: #ff6b35;
+    --dark: #1a1a2e;
+    --darker: #0f0f1e;
+    --card: #252547;
+    --card-light: #2f2f5a;
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--darker);
+    color: #fff;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .app {
+    max-width: 420px;
+    margin: 0 auto;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    position: relative;
+  }
+
+  /* Animated BG blobs */
+  .blob {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.25;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .blob-1 { width: 300px; height: 300px; background: var(--pink); top: -80px; left: -60px; animation: drift 12s ease-in-out infinite; }
+  .blob-2 { width: 250px; height: 250px; background: var(--purple); bottom: -50px; right: -50px; animation: drift 15s ease-in-out infinite reverse; }
+  .blob-3 { width: 200px; height: 200px; background: var(--cyan); top: 40%; left: 50%; animation: drift 10s ease-in-out infinite 2s; }
+
+  @keyframes drift {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -20px) scale(1.1); }
+    66% { transform: translate(-20px, 30px) scale(0.9); }
+  }
+
+  .screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 0.4s ease;
+  }
+  .screen.active { display: flex; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* LOGO */
+  .logo {
+    font-family: 'Lilita One', cursive;
+    font-size: 3.2rem;
+    background: linear-gradient(135deg, var(--pink), var(--purple), var(--blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 3px;
+    margin-top: 20px;
+    text-shadow: none;
+  }
+  .logo-small {
+    font-family: 'Lilita One', cursive;
+    font-size: 1.4rem;
+    background: linear-gradient(135deg, var(--pink), var(--purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    color: #b0b0d0;
+    font-size: 0.95rem;
+    margin-top: 8px;
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 32px;
+    border: none;
+    border-radius: 50px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .btn:active { transform: scale(0.96); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--pink), var(--purple));
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+  }
+  .btn-primary:hover:not(:disabled) { box-shadow: 0 6px 28px rgba(139, 92, 246, 0.6); }
+
+  .btn-secondary {
+    background: var(--card-light);
+    color: #fff;
+    border: 2px solid rgba(255,255,255,0.1);
+  }
+
+  .btn-cyan {
+    background: linear-gradient(135deg, var(--cyan), var(--blue));
+    color: var(--darker);
+    box-shadow: 0 4px 20px rgba(6, 214, 160, 0.3);
+  }
+
+  .btn-green {
+    background: linear-gradient(135deg, #06d6a0, #059669);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(6, 214, 160, 0.3);
+  }
+
+  /* Card */
+  .card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 24px;
+    width: 100%;
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+
+  /* Acronym display */
+  .acronym-display {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin: 20px 0;
+  }
+  .acronym-letter {
+    width: 56px;
+    height: 64px;
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Lilita One', cursive;
+    font-size: 2rem;
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(139, 92, 246, 0.4);
+    animation: popIn 0.3s ease backwards;
+  }
+  .acronym-letter:nth-child(2) { animation-delay: 0.05s; }
+  .acronym-letter:nth-child(3) { animation-delay: 0.1s; }
+  .acronym-letter:nth-child(4) { animation-delay: 0.15s; }
+  .acronym-letter:nth-child(5) { animation-delay: 0.2s; }
+
+  @keyframes popIn {
+    from { transform: scale(0) rotate(-10deg); opacity: 0; }
+    to { transform: scale(1) rotate(0); opacity: 1; }
+  }
+
+  /* Category chips */
+  .category-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin: 16px 0;
+  }
+  .chip {
+    padding: 10px 18px;
+    border-radius: 50px;
+    background: var(--card-light);
+    border: 2px solid transparent;
+    color: #ccc;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .chip:active { transform: scale(0.95); }
+  .chip.selected {
+    border-color: var(--cyan);
+    background: rgba(6, 214, 160, 0.15);
+    color: var(--cyan);
+  }
+
+  /* Input */
+  .name-input {
+    width: 100%;
+    padding: 16px 20px;
+    border-radius: 16px;
+    border: 2px solid rgba(255,255,255,0.1);
+    background: var(--darker);
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .name-input:focus { border-color: var(--purple); }
+  .name-input::placeholder { color: #555; }
+
+  /* Letter hints */
+  .letter-hints {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin: 12px 0 16px;
+    font-size: 0.85rem;
+    color: #888;
+  }
+  .letter-hint {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .letter-hint .ltr {
+    font-family: 'Lilita One', cursive;
+    font-size: 1.4rem;
+    color: var(--pink);
+  }
+
+  /* Player badge */
+  .player-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+  }
+  .p1-badge { background: rgba(255, 94, 172, 0.2); color: var(--pink); }
+  .p2-badge { background: rgba(59, 130, 246, 0.2); color: var(--blue); }
+
+  /* Reveal */
+  .reveal-card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 20px;
+    width: 100%;
+    margin-bottom: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+    text-align: center;
+  }
+  .reveal-category {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #888;
+    margin-bottom: 4px;
+  }
+  .reveal-name {
+    font-family: 'Lilita One', cursive;
+    font-size: 1.8rem;
+    margin: 8px 0;
+    line-height: 1.2;
+  }
+  .reveal-acronym {
+    font-size: 0.9rem;
+    color: #999;
+  }
+  .p1-name { color: var(--pink); }
+  .p2-name { color: var(--blue); }
+
+  /* Confetti canvas */
+  #confetti {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  .spacer { flex: 1; }
+  .mt-12 { margin-top: 12px; }
+  .mt-16 { margin-top: 16px; }
+  .mt-20 { margin-top: 20px; }
+  .mt-24 { margin-top: 24px; }
+  .mb-8 { margin-bottom: 8px; }
+  .mb-16 { margin-bottom: 16px; }
+  .w-full { width: 100%; }
+  .text-center { text-align: center; }
+  .text-sm { font-size: 0.85rem; color: #888; }
+
+  /* How-to-play */
+  .rules-list {
+    text-align: left;
+    padding: 0;
+    list-style: none;
+  }
+  .rules-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    font-size: 0.9rem;
+    color: #c0c0e0;
+  }
+  .rules-list li:last-child { border-bottom: none; }
+  .rule-num {
+    flex-shrink: 0;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--purple);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.8rem;
+    color: #fff;
+  }
+
+  /* Emoji reaction buttons */
+  .reaction-bar {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin: 16px 0;
+  }
+  .reaction-btn {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.1);
+    background: var(--card-light);
+    font-size: 1.4rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .reaction-btn:active { transform: scale(1.3); }
+  .reaction-btn.popped { animation: popReact 0.4s ease; }
+  @keyframes popReact {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.5); }
+    100% { transform: scale(1); }
+  }
+
+  .float-emoji {
+    position: fixed;
+    font-size: 2rem;
+    pointer-events: none;
+    z-index: 99;
+    animation: floatUp 1.2s ease-out forwards;
+  }
+  @keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-120px) scale(1.5); }
+  }
+
+  /* Waiting / status */
+  .waiting-icon {
+    font-size: 3.5rem;
+    margin: 20px 0;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.7; }
+  }
+
+  .step-dots {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin: 16px 0;
+  }
+  .step-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    transition: all 0.3s;
+  }
+  .step-dot.active { background: var(--pink); transform: scale(1.3); }
+  .step-dot.done { background: var(--cyan); }
+
+  /* Share link box */
+  .share-box {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: var(--darker);
+    border: 2px solid rgba(255,255,255,0.08);
+    color: #888;
+    font-size: 0.75rem;
+    word-break: break-all;
+    max-height: 80px;
+    overflow: hidden;
+    margin: 12px 0;
+    line-height: 1.4;
+  }
+
+  .copied-toast {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--cyan);
+    color: var(--darker);
+    padding: 10px 24px;
+    border-radius: 50px;
+    font-weight: 800;
+    font-size: 0.9rem;
+    z-index: 200;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+  }
+  .copied-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Mode selector */
+  .mode-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    margin-top: 20px;
+  }
+  .mode-card {
+    background: var(--card);
+    border: 2px solid rgba(255,255,255,0.06);
+    border-radius: 18px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+  }
+  .mode-card:active { transform: scale(0.98); }
+  .mode-card:hover { border-color: rgba(255,255,255,0.15); }
+  .mode-card h3 {
+    font-size: 1rem;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .mode-card p {
+    font-size: 0.82rem;
+    color: #888;
+    line-height: 1.4;
+  }
+</style>
+</head>
+<body>
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+<canvas id="confetti"></canvas>
+<div class="copied-toast" id="copied-toast">Link copied!</div>
+
+<div class="app" id="app">
+
+  <!-- SCREEN: Title -->
+  <div class="screen active" id="screen-title">
+    <div class="spacer"></div>
+    <div class="logo">ACRONAME</div>
+    <p class="subtitle">The party game where acronyms<br>become ridiculous names</p>
+    <div class="mode-cards">
+      <div class="mode-card" onclick="showScreen('screen-local-start')">
+        <h3>&#127911; Same Device</h3>
+        <p>Pass the phone back and forth between two players</p>
+      </div>
+      <div class="mode-card" onclick="startRemoteP1()">
+        <h3>&#128225; Play Remote</h3>
+        <p>Send a link to a friend and play from separate devices</p>
+      </div>
+    </div>
+    <button class="btn btn-secondary w-full mt-16" onclick="showScreen('screen-howto')">HOW TO PLAY</button>
+    <div class="spacer"></div>
+  </div>
+
+  <!-- SCREEN: How to play -->
+  <div class="screen" id="screen-howto">
+    <div class="logo-small">ACRONAME</div>
+    <div class="card">
+      <h2 style="text-align:center;margin-bottom:12px;font-size:1.1rem;">How to Play</h2>
+      <ol class="rules-list">
+        <li><span class="rule-num">1</span> Both players get the same random acronym (e.g. H.A.M.)</li>
+        <li><span class="rule-num">2</span> Each player picks a category for the OTHER player (e.g. "Band Name," "Secret Society")</li>
+        <li><span class="rule-num">3</span> Make up a name that fits your acronym AND category!</li>
+        <li><span class="rule-num">4</span> Reveal your creations and laugh!</li>
+      </ol>
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);">
+        <p style="font-size:0.82rem;color:#888;text-align:center;"><b style="color:#b0b0d0;">Remote play:</b> Share links back and forth. No sign-up needed!</p>
+      </div>
+    </div>
+    <div class="mt-16">
+      <button class="btn btn-primary" onclick="showScreen('screen-title')">GOT IT</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ -->
+  <!--         REMOTE PLAY SCREENS        -->
+  <!-- ═══════════════════════════════════ -->
+
+  <!-- REMOTE: P1 picks category for P2 -->
+  <div class="screen" id="screen-r-p1-category">
+    <div class="logo-small">ACRONAME</div>
+    <div class="player-badge p1-badge">YOU ARE PLAYER 1</div>
+    <div class="step-dots">
+      <div class="step-dot active"></div><div class="step-dot"></div><div class="step-dot"></div><div class="step-dot"></div>
+    </div>
+    <div class="card text-center">
+      <p class="text-sm mb-8">Your acronym is...</p>
+      <div class="acronym-display" id="r-p1-acronym"></div>
+      <p style="margin-top:16px;font-weight:700;">Pick a category for your opponent</p>
+      <p class="text-sm mb-16">This is what they'll have to name!</p>
+      <div class="category-grid" id="r-p1-cats"></div>
+    </div>
+    <div class="mt-16 w-full">
+      <button class="btn btn-primary w-full" id="r-p1-cat-btn" disabled onclick="remoteP1ConfirmCat()">SEND TO FRIEND</button>
+    </div>
+  </div>
+
+  <!-- REMOTE: P1 share link to P2 -->
+  <div class="screen" id="screen-r-p1-share">
+    <div class="logo-small">ACRONAME</div>
+    <div class="player-badge p1-badge">YOU ARE PLAYER 1</div>
+    <div class="spacer"></div>
+    <div class="waiting-icon">&#128228;</div>
+    <h2 style="font-size:1.2rem;">Send this to your friend!</h2>
+    <p class="subtitle">They'll pick your category, write their ACRONAME, and send a link back.</p>
+    <div class="share-box" id="r-p1-share-url"></div>
+    <div style="display:flex;gap:10px;width:100%;">
+      <button class="btn btn-cyan w-full" onclick="copyShareLink('r-p1-share-url')">&#128203; COPY LINK</button>
+      <button class="btn btn-green w-full" onclick="nativeShare('r-p1-share-url')">&#128228; SHARE</button>
+    </div>
+    <div class="spacer"></div>
+  </div>
+
+  <!-- REMOTE: P2 picks category + writes name -->
+  <div class="screen" id="screen-r-p2-turn">
+    <div class="logo-small">ACRONAME</div>
+    <div class="player-badge p2-badge">YOU ARE PLAYER 2</div>
+    <div class="step-dots">
+      <div class="step-dot done"></div><div class="step-dot active"></div><div class="step-dot"></div><div class="step-dot"></div>
+    </div>
+    <div class="card text-center">
+      <p class="text-sm mb-8">Your acronym is...</p>
+      <div class="acronym-display" id="r-p2-acronym"></div>
+
+      <div style="background:rgba(255,94,172,0.1);border-radius:12px;padding:12px;margin:8px 0 16px;">
+        <p style="font-size:0.75rem;text-transform:uppercase;letter-spacing:2px;color:#888;">Your category</p>
+        <p style="font-family:'Lilita One',cursive;font-size:1.3rem;color:var(--pink);" id="r-p2-my-cat"></p>
+      </div>
+
+      <p style="font-weight:700;">Now pick a category for Player 1</p>
+      <div class="category-grid" id="r-p2-cats"></div>
+    </div>
+    <div class="mt-16 w-full">
+      <button class="btn btn-primary w-full" id="r-p2-cat-btn" disabled onclick="remoteP2ShowInput()">NEXT</button>
+    </div>
+  </div>
+
+  <!-- REMOTE: P2 writes their ACRONAME -->
+  <div class="screen" id="screen-r-p2-input">
+    <div class="logo-small">ACRONAME</div>
+    <div class="player-badge p2-badge">YOU ARE PLAYER 2</div>
+    <div class="step-dots">
+      <div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot active"></div><div class="step-dot"></div>
+    </div>
+    <div class="card text-center">
+      <p class="reveal-category" id="r-p2-cat-label"></p>
+      <div class="acronym-display" id="r-p2-input-acronym"></div>
+      <div class="letter-hints" id="r-p2-hints"></div>
+      <input class="name-input" id="r-p2-name" placeholder="Type your ACRONAME..." maxlength="100" autocomplete="off">
+    </div>
+    <div class="mt-16 w-full">
+      <button class="btn btn-primary w-full" id="r-p2-submit-btn" disabled onclick="remoteP2Submit()">SEND BACK</button>
+    </div>
+  </div>
+
+  <!-- REMOTE: P2 share link back to P1 -->
+  <div class="screen" id="screen-r-p2-share">
+    <div class="logo-small">ACRONAME</div>
+    <div class="player-badge p2-badge">YOU ARE PLAYER 2</div>
+    <div class="spacer"></div>
+    <div class="waiting-icon">&#128228;</div>
+    <h2 style="font-size:1.2rem;">Send this back to Player 1!</h2>
+    <p class="subtitle">They'll write their ACRONAME and send the final reveal link to you.</p>
+    <div class="share-box" id="r-p2-share-url"></div>
+    <div style="display:flex;gap:10px;width:100%;">
+      <button class="btn btn-cyan w-full" onclick="copyShareLink('r-p2-share-url')">&#128203; COPY LINK</button>
+      <button class="btn btn-green w-full" onclick="nativeShare('r-p2-share-url')">&#128228; SHARE</button>
+    </div>
+    <div class="spacer"></div>
+  </div>
+
+  <!-- REMOTE: P1 writes their ACRONAME (after P2 has gone) -->
+  <div class="screen" id="screen-r-p1-input">
+    <div class="logo-small">ACRONAME</div>
+    <div class="player-badge p1-badge">YOU ARE PLAYER 1</div>
+    <div class="step-dots">
+      <div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot active"></div><div class="step-dot"></div>
+    </div>
+    <div class="card text-center">
+      <p class="reveal-category" id="r-p1-cat-label"></p>
+      <div class="acronym-display" id="r-p1-input-acronym"></div>
+      <div class="letter-hints" id="r-p1-hints"></div>
+      <input class="name-input" id="r-p1-name" placeholder="Type your ACRONAME..." maxlength="100" autocomplete="off">
+    </div>
+    <div class="mt-16 w-full">
+      <button class="btn btn-primary w-full" id="r-p1-submit-btn" disabled onclick="remoteP1Submit()">REVEAL TIME</button>
+    </div>
+  </div>
+
+  <!-- REMOTE: P1 gets reveal + share link -->
+  <div class="screen" id="screen-r-p1-reveal">
+    <div class="logo-small">ACRONAME</div>
+    <div class="step-dots">
+      <div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot active"></div>
+    </div>
+
+    <div class="reveal-card">
+      <div class="player-badge p1-badge">PLAYER 1 (YOU)</div>
+      <p class="reveal-category" id="rr-p1-cat"></p>
+      <p class="reveal-name p1-name" id="rr-p1-name"></p>
+      <p class="reveal-acronym" id="rr-p1-acro"></p>
+    </div>
+    <div class="reveal-card">
+      <div class="player-badge p2-badge">PLAYER 2</div>
+      <p class="reveal-category" id="rr-p2-cat"></p>
+      <p class="reveal-name p2-name" id="rr-p2-name"></p>
+      <p class="reveal-acronym" id="rr-p2-acro"></p>
+    </div>
+
+    <div class="reaction-bar">
+      <button class="reaction-btn" onclick="react(this,'\u{1F602}')">&#128514;</button>
+      <button class="reaction-btn" onclick="react(this,'\u{1F60D}')">&#128525;</button>
+      <button class="reaction-btn" onclick="react(this,'\u{1F92F}')">&#129327;</button>
+      <button class="reaction-btn" onclick="react(this,'\u{1F62D}')">&#128557;</button>
+      <button class="reaction-btn" onclick="react(this,'\u{1F389}')">&#127881;</button>
+    </div>
+
+    <p class="text-sm text-center mb-8">Send the reveal to Player 2!</p>
+    <div style="display:flex;gap:10px;width:100%;">
+      <button class="btn btn-cyan w-full" onclick="copyShareLink('r-reveal-share-url')">&#128203; COPY</button>
+      <button class="btn btn-green w-full" onclick="nativeShare('r-reveal-share-url')">&#128228; SHARE</button>
+    </div>
+    <div class="share-box" id="r-reveal-share-url" style="font-size:0.7rem;"></div>
+
+    <div class="mt-12 w-full">
+      <button class="btn btn-primary w-full" onclick="startRemoteP1()">PLAY AGAIN</button>
+      <button class="btn btn-secondary w-full mt-12" onclick="goHome()">HOME</button>
+    </div>
+  </div>
+
+  <!-- REMOTE: P2 sees the reveal -->
+  <div class="screen" id="screen-r-p2-reveal">
+    <div class="logo-small">ACRONAME</div>
+    <div class="step-dots">
+      <div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div>
+    </div>
+
+    <div class="reveal-card">
+      <div class="player-badge p1-badge">PLAYER 1</div>
+      <p class="reveal-category" id="rr2-p1-cat"></p>
+      <p class="reveal-name p1-name" id="rr2-p1-name"></p>
+      <p class="reveal-acronym" id="rr2-p1-acro"></p>
+    </div>
+    <div class="reveal-card">
+      <div class="player-badge p2-badge">PLAYER 2 (YOU)</div>
+      <p class="reveal-category" id="rr2-p2-cat"></p>
+      <p class="reveal-name p2-name" id="rr2-p2-name"></p>
+      <p class="reveal-acronym" id="rr2-p2-acro"></p>
+    </div>
+
+    <div class="reaction-bar">
+      <button class="reaction-btn" onclick="react(this,'\u{1F602}')">&#128514;</button>
+      <button class="reaction-btn" onclick="react(this,'\u{1F60D}')">&#128525;</button>
+      <button class="reaction-btn" onclick="react(this,'\u{1F92F}')">&#129327;</button>
+      <button class="reaction-btn" onclick="react(this,'\u{1F62D}')">&#128557;</button>
+      <button class="reaction-btn" onclick="react(this,'\u{1F389}')">&#127881;</button>
+    </div>
+
+    <div class="mt-12 w-full">
+      <button class="btn btn-primary w-full" onclick="startRemoteP1()">NEW GAME (AS P1)</button>
+      <button class="btn btn-secondary w-full mt-12" onclick="goHome()">HOME</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ -->
+  <!--         LOCAL PLAY SCREENS         -->
+  <!-- ═══════════════════════════════════ -->
+
+  <div class="screen" id="screen-local-start">
+    <div class="logo-small">ACRONAME</div>
+    <div class="card text-center">
+      <p class="text-sm mb-8">Your acronym is...</p>
+      <div class="acronym-display" id="l-acronym-display"></div>
+      <p style="color:#666;font-size:0.8rem;" id="l-acronym-word"></p>
+    </div>
+    <div class="mt-20 w-full">
+      <button class="btn btn-primary w-full" onclick="showScreen('screen-l-p1-cat')">LET'S GO</button>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-l-p1-cat">
+    <div class="logo-small">ACRONAME</div>
+    <div class="player-badge p1-badge">PLAYER 1</div>
+    <div class="card text-center">
+      <p class="mb-8" style="font-weight:700;">Pick a category for Player 2</p>
+      <div class="category-grid" id="l-p1-cats"></div>
+    </div>
+    <div class="mt-16 w-full">
+      <button class="btn btn-primary w-full" id="l-p1-cat-btn" disabled onclick="localP1Cat()">LOCK IT IN</button>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-l-pass-p2">
+    <div class="spacer"></div>
+    <div class="waiting-icon">&#128241;</div>
+    <h2>Pass to Player 2</h2>
+    <p class="subtitle">Time for Player 2 to pick a category!</p>
+    <div class="mt-20">
+      <button class="btn btn-cyan" onclick="showScreen('screen-l-p2-cat')">I'M PLAYER 2</button>
+    </div>
+    <div class="spacer"></div>
+  </div>
+
+  <div class="screen" id="screen-l-p2-cat">
+    <div class="logo-small">ACRONAME</div>
+    <div class="player-badge p2-badge">PLAYER 2</div>
+    <div class="card text-center">
+      <p class="mb-8" style="font-weight:700;">Pick a category for Player 1</p>
+      <div class="category-grid" id="l-p2-cats"></div>
+    </div>
+    <div class="mt-16 w-full">
+      <button class="btn btn-primary w-full" id="l-p2-cat-btn" disabled onclick="localP2Cat()">LOCK IT IN</button>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-l-pass-p1-input">
+    <div class="spacer"></div>
+    <div class="waiting-icon">&#128241;</div>
+    <h2>Pass to Player 1</h2>
+    <p class="subtitle">Time to write your ACRONAME!</p>
+    <div class="mt-20">
+      <button class="btn btn-primary" onclick="localShowP1Input()">I'M PLAYER 1</button>
+    </div>
+    <div class="spacer"></div>
+  </div>
+
+  <div class="screen" id="screen-l-p1-input">
+    <div class="logo-small">ACRONAME</div>
+    <div class="player-badge p1-badge">PLAYER 1</div>
+    <div class="card text-center">
+      <p class="reveal-category" id="l-p1-cat-label"></p>
+      <div class="acronym-display" id="l-p1-acro-display"></div>
+      <div class="letter-hints" id="l-p1-hints"></div>
+      <input class="name-input" id="l-p1-name" placeholder="Type your ACRONAME..." maxlength="100" autocomplete="off">
+    </div>
+    <div class="mt-16 w-full">
+      <button class="btn btn-primary w-full" id="l-p1-sub-btn" disabled onclick="localP1Submit()">SUBMIT</button>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-l-pass-p2-input">
+    <div class="spacer"></div>
+    <div class="waiting-icon">&#128241;</div>
+    <h2>Pass to Player 2</h2>
+    <p class="subtitle">Time to write your ACRONAME!</p>
+    <div class="mt-20">
+      <button class="btn btn-cyan" onclick="localShowP2Input()">I'M PLAYER 2</button>
+    </div>
+    <div class="spacer"></div>
+  </div>
+
+  <div class="screen" id="screen-l-p2-input">
+    <div class="logo-small">ACRONAME</div>
+    <div class="player-badge p2-badge">PLAYER 2</div>
+    <div class="card text-center">
+      <p class="reveal-category" id="l-p2-cat-label"></p>
+      <div class="acronym-display" id="l-p2-acro-display"></div>
+      <div class="letter-hints" id="l-p2-hints"></div>
+      <input class="name-input" id="l-p2-name" placeholder="Type your ACRONAME..." maxlength="100" autocomplete="off">
+    </div>
+    <div class="mt-16 w-full">
+      <button class="btn btn-primary w-full" id="l-p2-sub-btn" disabled onclick="localP2Submit()">SUBMIT</button>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-l-reveal">
+    <div class="logo-small">ACRONAME</div>
+    <div class="reveal-card">
+      <div class="player-badge p1-badge">PLAYER 1</div>
+      <p class="reveal-category" id="lr-p1-cat"></p>
+      <p class="reveal-name p1-name" id="lr-p1-name"></p>
+      <p class="reveal-acronym" id="lr-p1-acro"></p>
+    </div>
+    <div class="reveal-card">
+      <div class="player-badge p2-badge">PLAYER 2</div>
+      <p class="reveal-category" id="lr-p2-cat"></p>
+      <p class="reveal-name p2-name" id="lr-p2-name"></p>
+      <p class="reveal-acronym" id="lr-p2-acro"></p>
+    </div>
+    <div class="reaction-bar">
+      <button class="reaction-btn" onclick="react(this,'\u{1F602}')">&#128514;</button>
+      <button class="reaction-btn" onclick="react(this,'\u{1F60D}')">&#128525;</button>
+      <button class="reaction-btn" onclick="react(this,'\u{1F92F}')">&#129327;</button>
+      <button class="reaction-btn" onclick="react(this,'\u{1F62D}')">&#128557;</button>
+      <button class="reaction-btn" onclick="react(this,'\u{1F389}')">&#127881;</button>
+    </div>
+    <div class="mt-12 w-full" style="display:flex;flex-direction:column;gap:10px;">
+      <button class="btn btn-primary w-full" onclick="localPlayAgain()">PLAY AGAIN</button>
+      <button class="btn btn-secondary w-full" onclick="goHome()">HOME</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════
+//          WORD & CATEGORY DATA
+// ═══════════════════════════════════════
+const WORDS = {
+  3: ["ACE","ACT","ADD","AGE","AID","AIM","AIR","ALE","ALL","AND","ANT","APE","ARC","ARK","ARM","ART","AWE","AXE","BAD","BAG","BAN","BAR","BAT","BAY","BED","BET","BIG","BIT","BOW","BOX","BOY","BUD","BUG","BUN","BUS","BUY","CAB","CAN","CAP","CAR","CAT","COP","COT","COW","CRY","CUB","CUP","CUT","DAB","DAD","DAM","DAY","DEN","DEW","DIG","DIM","DIP","DOC","DOG","DOT","DRY","DUB","DUO","DYE","EAR","EAT","EEL","EGG","ELF","ELK","ELM","EMU","END","ERA","EVE","EWE","EYE","FAN","FAR","FAT","FAX","FIG","FIN","FIT","FIX","FLY","FOB","FOE","FOG","FOX","FRY","FUN","FUR","GAB","GAG","GAP","GAS","GEL","GEM","GIG","GIN","GNU","GOB","GOD","GUM","GUN","GUT","GUY","GYM","HAD","HAM","HAT","HAY","HEN","HEW","HIM","HIP","HIT","HOB","HOG","HOP","HOT","HUB","HUE","HUG","HUM","HUT","ICE","ICY","ILL","IMP","INK","INN","ION","IRE","IRK","IVY","JAB","JAG","JAM","JAR","JAW","JAY","JET","JIG","JOB","JOG","JOT","JOY","JUG","KEG","KEN","KEY","KID","KIN","KIT","LAB","LAD","LAG","LAP","LAW","LAY","LEA","LED","LEG","LID","LIE","LIP","LIT","LOG","LOT","LOW","LUG","MAD","MAN","MAP","MAR","MAT","MAW","MAY","MEN","MET","MID","MIX","MOB","MOM","MOP","MUD","MUG","MUM","NAB","NAG","NAP","NET","NEW","NIL","NIT","NOD","NOR","NOT","NOW","NUB","NUN","NUT","OAK","OAR","OAT","ODD","ODE","OIL","OLD","ONE","OPT","ORB","ORE","OUR","OUT","OWE","OWL","OWN","PAD","PAL","PAN","PAT","PAW","PAY","PEA","PEG","PEN","PEP","PET","PEW","PIE","PIG","PIN","PIT","PLY","POD","POP","POT","POW","PRY","PUB","PUG","PUN","PUP","PUT","RAG","RAM","RAN","RAP","RAT","RAW","RAY","RED","REF","RIB","RIG","RIM","RIP","ROB","ROD","ROT","ROW","RUB","RUG","RUM","RUN","RUT","RYE","SAC","SAD","SAG","SAP","SAT","SAW","SAY","SEA","SET","SEW","SHY","SIN","SIP","SIT","SIX","SKI","SKY","SLY","SOB","SOD","SON","SOP","SOW","SOY","SPA","SPY","STY","SUB","SUM","SUN","TAB","TAD","TAG","TAN","TAP","TAR","TAT","TAX","TEA","TEN","TIE","TIN","TIP","TOE","TON","TOP","TOT","TOW","TOY","TRY","TUB","TUG","TWO","URN","USE","VAN","VAT","VET","VIA","VIE","VOW","WAD","WAG","WAR","WAX","WAY","WEB","WED","WET","WIG","WIN","WIT","WOE","WOK","WON","WOO","WOW","YAK","YAM","YAP","YAW","YEN","YES","YEW","YOU","ZAP","ZEN","ZIP","ZIT","ZOO"],
+  4: ["ABLE","ACHE","ACID","ACME","ACRE","AGED","AIDE","ARCH","AREA","ARMY","AXLE","BABE","BACK","BAIT","BAKE","BALD","BALE","BALL","BAND","BANE","BANG","BANK","BARE","BARK","BARN","BASE","BATH","BEAD","BEAM","BEAN","BEAR","BEAT","BEEF","BEER","BELL","BELT","BEND","BEST","BIKE","BILL","BIND","BIRD","BITE","BLOB","BLOG","BLOW","BLUE","BLUR","BOAR","BOAT","BODY","BOLD","BOLT","BOMB","BOND","BONE","BOOK","BOOM","BOOT","BORE","BORN","BOSS","BOUT","BOWL","BRED","BREW","BULB","BULK","BULL","BUMP","BUNK","BURN","BUSH","BUST","BUSY","BUZZ","CAFE","CAGE","CAKE","CALF","CALM","CAME","CAMP","CANE","CAPE","CARD","CARE","CART","CASE","CASH","CAST","CAVE","CHEF","CHIN","CHIP","CHOP","CITE","CITY","CLAD","CLAM","CLAN","CLAP","CLAW","CLAY","CLIP","CLOT","CLUB","CLUE","COAL","COAT","CODE","COIL","COIN","COLD","COME","CONE","COOK","COOL","COPE","COPY","CORD","CORE","CORK","CORN","COST","COZY","CRAB","CREW","CROP","CROW","CUBE","CULT","CURB","CURE","CURL","CUTE","DALE","DAME","DAMP","DARE","DARK","DART","DASH","DATA","DATE","DAWN","DEAD","DEAF","DEAL","DEAR","DECK","DEED","DEEP","DEER","DEMO","DENT","DENY","DESK","DIAL","DICE","DIET","DIME","DINE","DIRE","DIRT","DISC","DISH","DOCK","DOME","DONE","DOOM","DOOR","DOSE","DOVE","DOWN","DOZE","DRAG","DRAW","DROP","DRUM","DUAL","DUCK","DUDE","DUEL","DUKE","DULL","DUMB","DUMP","DUNE","DUNK","DUSK","DUST","DUTY","EACH","EARL","EARN","EASE","EAST","EASY","EDGE","EDIT","EMIT","ENVY","EPIC","EVEN","EVER","EVIL","EXAM","FACE","FACT","FADE","FAIL","FAIR","FAKE","FALL","FAME","FANG","FARE","FARM","FAST","FATE","FAWN","FEAR","FEAT","FEED","FEEL","FELL","FELT","FERN","FEST","FEUD","FILE","FILL","FILM","FIND","FINE","FIRE","FIRM","FISH","FIST","FLAG","FLAK","FLAP","FLAT","FLAW","FLEA","FLED","FLEW","FLEX","FLIP","FLIT","FLOG","FLOP","FLOW","FOAM","FOIL","FOLD","FOLK","FOND","FONT","FOOD","FOOL","FOOT","FORD","FORK","FORM","FORT","FOUL","FOUR","FOWL","FREE","FROG","FROM","FUEL","FULL","FUME","FUND","FUNK","FURY","FUSE","FUSS","FUZZ","GAIN","GALE","GAME","GANG","GAPE","GARB","GASH","GASP","GATE","GAZE","GEAR","GENE","GERM","GIFT","GIST","GIVE","GLAD","GLEN","GLIB","GLOB","GLOW","GLUE","GLUM","GNAT","GNAW","GOAT","GOLD","GOLF","GONE","GOOD","GORE","GRAB","GRID","GRIM","GRIN","GRIP","GRIT","GROW","GULF","GURU","GUST","GUTS","HACK","HAIL","HAIR","HALE","HALF","HALL","HALT","HAND","HANG","HARE","HARM","HARP","HASH","HATE","HAUL","HAWK","HAZE","HAZY","HEAD","HEAL","HEAP","HEAR","HEAT","HEED","HEEL","HELD","HELM","HELP","HERB","HERD","HERE","HERO","HIDE","HIGH","HIKE","HILL","HILT","HINT","HIRE","HISS","HIVE","HOAX","HOLD","HOLE","HOME","HONE","HOOD","HOOF","HOOK","HOOP","HOPE","HORN","HOST","HOUR","HOWL","HUGE","HULK","HULL","HUMP","HUNK","HUNT","HURL","HURT","HUSH","HYMN","ICON","IDEA","IDLE","INCH","INTO","IRON","ISLE","ITEM","JACK","JADE","JAIL","JAMS","JAPE","JARS","JAVA","JAWS","JAZZ","JEAN","JEER","JERK","JEST","JIBE","JILT","JINX","JIVE","JOBS","JOIN","JOKE","JOLT","JOSH","JOYS","JURY","JUST","KEEN","KEEP","KELP","KEPT","KEYS","KICK","KIDS","KILL","KIND","KING","KISS","KITE","KNEE","KNIT","KNOB","KNOT","KNOW","LACE","LACK","LAID","LAIR","LAKE","LAMB","LAME","LAMP","LAND","LANE","LARK","LASH","LASS","LAST","LATE","LAWN","LAZY","LEAD","LEAF","LEAK","LEAN","LEAP","LEFT","LEND","LENS","LEVY","LIAR","LICE","LICK","LIFE","LIFT","LIKE","LIMB","LIME","LIMP","LINE","LINK","LINT","LION","LIST","LIVE","LOAD","LOAF","LOAN","LOBE","LOCK","LODE","LOFT","LOGO","LONE","LONG","LOOK","LOOM","LOOP","LORD","LORE","LOSE","LOSS","LOST","LOTS","LOUD","LOVE","LUCK","LULL","LUMP","LUNG","LURE","LURK","LUSH","LUST","MACE","MADE","MAID","MAIL","MAIN","MAKE","MALE","MALL","MALT","MANE","MANY","MARE","MARK","MARS","MASK","MASS","MAST","MATE","MAZE","MEAD","MEAL","MEAN","MEAT","MEET","MELD","MELT","MEMO","MEND","MENU","MERE","MESH","MESS","MICE","MILD","MILE","MILK","MILL","MIME","MIND","MINE","MINT","MIRE","MISS","MIST","MITE","MOAT","MOCK","MODE","MOLD","MOLE","MONK","MOOD","MOON","MOOR","MORE","MOSS","MOST","MOTH","MOVE","MUCH","MUCK","MULE","MULL","MUSE","MUSH","MUST","MUTE","MYTH","NAIL","NAME","NAPE","NAVE","NAVY","NEAR","NEAT","NECK","NEED","NEST","NEWS","NEXT","NICE","NINE","NODE","NONE","NOOK","NORM","NOSE","NOTE","NOUN","NUDE","NULL","NUMB","OATH","OBEY","ODDS","OMEN","OMIT","ONCE","ONLY","ONTO","OOZE","OPAL","OPEN","ORAL","ORCA","OVEN","OVER","OWLS","OWNS","PACE","PACK","PACT","PAGE","PAID","PAIL","PAIN","PAIR","PALE","PALM","PANE","PANG","PARE","PARK","PART","PASS","PAST","PATH","PAVE","PAWN","PEAK","PEAL","PEAR","PEAT","PECK","PEEL","PEER","PELT","PENS","PERK","PEST","PICK","PIER","PIKE","PILE","PILL","PINE","PINK","PINT","PIPE","PLAN","PLAY","PLEA","PLOD","PLOT","PLOW","PLOY","PLUG","PLUM","PLUS","POEM","POET","POKE","POLE","POLL","POMP","POND","PONY","POOL","PORE","PORK","PORT","POSE","POST","POUR","PRAY","PREP","PREY","PROD","PROP","PROW","PULL","PULP","PUMP","PUNK","PURE","PUSH","QUIT","QUIZ","RACE","RACK","RAFT","RAGE","RAID","RAIL","RAIN","RAKE","RAMP","RANG","RANK","RANT","RARE","RASH","RATE","RAVE","READ","REAL","REAM","REAP","REAR","REED","REEF","REEL","REIN","RELY","REND","RENT","REST","RICH","RIDE","RIFT","RILE","RIME","RIND","RING","RIOT","RIPE","RISE","RISK","ROAD","ROAM","ROAR","ROBE","ROCK","RODE","ROLE","ROLL","ROOF","ROOM","ROOT","ROPE","ROSE","ROTE","ROUT","ROVE","RUDE","RUIN","RULE","RUNG","RUNT","RUSE","RUSH","RUST","SACK","SAFE","SAGE","SAID","SAIL","SAKE","SALE","SALT","SAME","SAND","SANE","SANG","SASH","SAVE","SEAL","SEAM","SEAT","SECT","SEED","SEEK","SEEM","SELF","SELL","SEND","SHED","SHIN","SHIP","SHOE","SHOP","SHOT","SHOW","SHUT","SICK","SIDE","SIFT","SIGH","SIGN","SILK","SILL","SILT","SING","SINK","SIRE","SITE","SIZE","SKIT","SLAB","SLAG","SLAM","SLAP","SLAW","SLAY","SLED","SLEW","SLID","SLIM","SLIT","SLOB","SLOT","SLOW","SLUG","SLUM","SLUR","SMOG","SNAP","SNIP","SNOB","SNOW","SNUB","SNUG","SOAK","SOAP","SOAR","SOCK","SODA","SOFA","SOFT","SOIL","SOLD","SOLE","SOME","SONG","SOON","SOOT","SORE","SORT","SOUL","SOUR","SPAM","SPAN","SPAR","SPEC","SPED","SPIN","SPIT","SPOT","SPRY","SPUR","STAB","STAG","STAR","STAY","STEM","STEP","STEW","STIR","STOP","STUB","STUD","STUN","SUIT","SULK","SUNG","SUNK","SURE","SURF","SWAN","SWAP","SWIM","TACK","TACT","TAIL","TAKE","TALE","TALK","TALL","TAME","TANG","TANK","TAPE","TARN","TART","TASK","TAXI","TEAK","TEAL","TEAM","TEAR","TELL","TEND","TENT","TERM","TEST","TEXT","THIN","TICK","TIDE","TIDY","TIED","TIER","TILE","TILL","TILT","TIME","TINT","TINY","TIRE","TOAD","TOES","TOIL","TOLD","TOLL","TOMB","TOME","TONE","TOOK","TOOL","TOPS","TORE","TORN","TOSS","TOUR","TOWN","TRAP","TRAY","TREE","TREK","TRIM","TRIO","TRIP","TROT","TRUE","TUCK","TUFT","TUNA","TUNE","TURF","TURN","TUSK","TWIG","TWIN","TYPE","UNDO","UNIT","UPON","URGE","USED","USER","VAIN","VALE","VANE","VARY","VASE","VAST","VEIL","VEIN","VENT","VERB","VERY","VEST","VETO","VICE","VIEW","VILE","VINE","VOID","VOLT","VOTE","WADE","WAGE","WAIL","WAIT","WAKE","WALK","WALL","WAND","WANT","WARD","WARM","WARN","WARP","WART","WARY","WASH","WASP","WAVE","WAVY","WEAK","WEAN","WEAR","WEED","WEEK","WEEP","WELD","WELL","WENT","WEST","WHIM","WHIP","WICK","WIDE","WIFE","WILD","WILL","WILT","WILY","WIMP","WIND","WINE","WING","WINK","WIPE","WIRE","WISE","WISH","WITS","WOKE","WOLF","WOMB","WOOD","WOOL","WORD","WORE","WORK","WORM","WORN","WOVE","WRAP","WREN","WRIT","YANK","YARD","YARN","YEAR","YELL","YOUR","YURT","ZEAL","ZERO","ZEST","ZINC","ZONE","ZOOM"],
+  5: ["ABODE","ABOVE","ACUTE","ADEPT","ADMIN","ADMIT","ADOPT","AGILE","ALIGN","ALIVE","ALLOT","ALLOW","AMBER","AMPLE","ANGEL","ANGLE","ANKLE","ANVIL","APPLE","ARENA","AROMA","ASIDE","ATLAS","ATTIC","BADGE","BAKER","BARON","BASIC","BASIN","BATCH","BEAST","BEGIN","BEING","BENCH","BLACK","BLADE","BLAME","BLAND","BLANK","BLAST","BLAZE","BLEAK","BLEED","BLEND","BLESS","BLIND","BLISS","BLOCK","BLOKE","BLOND","BLOOD","BLOOM","BLOWN","BLUFF","BLUNT","BLURT","BOARD","BOAST","BONUS","BOOTH","BOUND","BRACE","BRAIN","BRAND","BRASS","BRAVE","BREAD","BREAK","BREED","BRICK","BRIDE","BRIEF","BRING","BRINK","BRISK","BROAD","BROKE","BROOK","BROTH","BROWN","BRUSH","BUILD","BUNCH","BURST","BUYER","CABIN","CABLE","CAMEL","CANDY","CARGO","CARRY","CARVE","CATCH","CAUSE","CEDAR","CHAIN","CHAIR","CHALK","CHAMP","CHANT","CHAOS","CHARM","CHART","CHASE","CHEAP","CHEAT","CHECK","CHEEK","CHEER","CHESS","CHEST","CHIEF","CHILD","CHILL","CHIME","CHINA","CHUNK","CIVIC","CIVIL","CLAIM","CLAMP","CLASH","CLASP","CLASS","CLEAN","CLEAR","CLERK","CLICK","CLIFF","CLIMB","CLING","CLOAK","CLOCK","CLONE","CLOSE","CLOTH","CLOUD","CLOWN","COACH","COAST","COBRA","COLOR","COMET","CORAL","COUCH","COUNT","COURT","COVER","CRACK","CRAFT","CRANE","CRASH","CRATE","CRAWL","CRAZE","CRAZY","CREAM","CREST","CRISP","CROSS","CROWD","CROWN","CRUDE","CRUSH","CRUST","CURVE","DAILY","DANCE","DELTA","DEMON","DEPTH","DODGE","DOING","DONOR","DOUBT","DOUGH","DRAFT","DRAIN","DRAKE","DRAMA","DRANK","DRAPE","DRAWN","DREAD","DREAM","DRESS","DRIED","DRIFT","DRILL","DRINK","DRIVE","DRONE","DROWN","DRUNK","DWARF","EAGLE","EARTH","EASEL","EIGHT","ELBOW","ELDER","ELITE","EMBER","EMPTY","ENEMY","ENJOY","ENTER","ENVOY","EQUAL","EQUIP","ERODE","ERROR","EVENT","EVERY","EXACT","EXALT","EXILE","EXIST","EXTRA","FABLE","FACET","FAINT","FAIRY","FAITH","FANCY","FEAST","FIBER","FIELD","FIEND","FIFTY","FIGHT","FINAL","FIRST","FLAME","FLANK","FLARE","FLASH","FLASK","FLESH","FLICK","FLING","FLINT","FLOAT","FLOCK","FLOOD","FLOOR","FLORA","FLOUR","FLUID","FLUSH","FOCAL","FOLLY","FORCE","FORGE","FORTH","FORUM","FOUND","FRAME","FRANK","FRAUD","FRESH","FRONT","FROST","FRUIT","FUNGI","GAUGE","GHOST","GIANT","GIVEN","GLAND","GLARE","GLASS","GLEAM","GLIDE","GLOBE","GLOOM","GLORY","GLOSS","GLOVE","GOING","GRACE","GRADE","GRAIN","GRAND","GRANT","GRAPE","GRAPH","GRASP","GRASS","GRAVE","GRAZE","GREAT","GREED","GREEN","GREET","GRIEF","GRIND","GROAN","GROOM","GROSS","GROUP","GROVE","GROWN","GUARD","GUESS","GUIDE","GUILD","GUILT","GUISE","HABIT","HAPPY","HARDY","HASTE","HAUNT","HAVEN","HEART","HEAVY","HEDGE","HEIST","HENCE","HERBS","HERON","HINGE","HOBBY","HOIST","HOMER","HONEY","HONOR","HORSE","HOTEL","HOUSE","HOVER","HUMAN","HUMID","HUMOR","HYENA","IDEAL","IMAGE","IMPLY","INDEX","INDIE","INNER","INPUT","IRATE","IVORY","JOKER","JOLLY","JUDGE","JUICE","KNACK","KNEAD","KNEEL","KNIFE","KNOCK","LABEL","LANCE","LASER","LATCH","LATER","LAUGH","LAYER","LEACH","LEARN","LEASE","LEAVE","LEGAL","LEVEL","LEVER","LIGHT","LIMIT","LINEN","LINER","LODGE","LOGIC","LOFTY","LOOSE","LOVER","LOWER","LUCKY","LUNAR","LUNCH","MAGIC","MAJOR","MAKER","MANOR","MARCH","MARSH","MATCH","MAYOR","MEDAL","MERCY","MERIT","METAL","METER","MIGHT","MINER","MINOR","MINUS","MIRTH","MODEL","MONTH","MORAL","MOUNT","MOUSE","MOUTH","MOVER","MOVIE","MUDDY","MUSIC","NAIVE","NERVE","NEVER","NIGHT","NOBLE","NOISE","NORTH","NOTED","NOVEL","NURSE","OASIS","OCEAN","OLIVE","ONSET","OPERA","ORBIT","ORDER","OTHER","OUTER","OXIDE","PAINT","PANDA","PANEL","PANIC","PATCH","PAUSE","PEACE","PEACH","PEARL","PERCH","PHASE","PHONE","PHOTO","PIANO","PIECE","PILOT","PINCH","PIXEL","PLACE","PLAID","PLAIN","PLANE","PLANK","PLANT","PLATE","PLAZA","PLEAD","PLUMB","PLUME","PLUMP","POACH","POINT","POLAR","POUND","POWER","PRESS","PRICE","PRIDE","PRIME","PRINT","PRIOR","PRIZE","PROBE","PRONE","PROOF","PROSE","PROUD","PROVE","PROXY","PSALM","PULSE","PUNCH","PUPIL","PURGE","QUEEN","QUERY","QUEST","QUICK","QUIET","QUIRK","QUOTA","QUOTE","RADAR","RADIO","RAISE","RALLY","RANCH","RANGE","RAPID","RAVEN","REACH","REACT","REALM","REBEL","REFER","REIGN","RELAX","RIDER","RIDGE","RIFLE","RIGHT","RIGID","RINSE","RIVAL","RIVER","ROAST","ROBIN","ROBOT","ROCKY","ROGUE","ROUND","ROUTE","ROYAL","RUGBY","RURAL","SAINT","SALAD","SCALE","SCARE","SCENE","SCENT","SCOPE","SCORE","SCOUT","SCRAP","SERVE","SEVEN","SHADE","SHAKE","SHALL","SHAME","SHAPE","SHARE","SHARK","SHARP","SHAVE","SHELF","SHELL","SHIFT","SHIRE","SHIRT","SHOCK","SHORE","SHORT","SHOUT","SHOVE","SIGHT","SINCE","SIXTY","SKATE","SKILL","SKULL","SLATE","SLEEP","SLICE","SLIDE","SLOPE","SMALL","SMART","SMELL","SMILE","SMOKE","SNACK","SNAIL","SNAKE","SOLAR","SOLID","SOLVE","SONIC","SOUND","SOUTH","SPACE","SPARE","SPARK","SPEAK","SPEAR","SPEED","SPELL","SPEND","SPICE","SPINE","SPOKE","SPOON","SPORT","SPRAY","STACK","STAFF","STAGE","STAIN","STAKE","STALK","STALL","STAMP","STAND","STARE","START","STATE","STAVE","STEAK","STEAL","STEAM","STEEL","STEEP","STEER","STERN","STICK","STILL","STING","STOCK","STOKE","STOLE","STONE","STOOD","STOOL","STORE","STORM","STORY","STOUT","STOVE","STRAP","STRAW","STRAY","STRIP","STUCK","STUDY","STUFF","STUMP","STUNG","STUNT","STYLE","SUGAR","SUPER","SURGE","SWAMP","SWARM","SWEAR","SWEAT","SWEEP","SWEET","SWEPT","SWIFT","SWING","SWORD","SWORE","SWORN","TABLE","TALON","TASTE","TEETH","TEMPO","TENSE","THEFT","THEME","THERE","THICK","THIEF","THING","THINK","THORN","THREE","THROW","THUMB","TIGER","TIGHT","TIMER","TIRED","TITLE","TOAST","TODAY","TOKEN","TOTAL","TOUCH","TOUGH","TOWEL","TOWER","TOXIC","TRACE","TRACK","TRADE","TRAIL","TRAIN","TRAIT","TRASH","TREAT","TREND","TRIAL","TRIBE","TRICK","TROUT","TRUCK","TRULY","TRUNK","TRUST","TRUTH","TULIP","TUNER","TWIST","ULTRA","UNCLE","UNDER","UNIFY","UNION","UNITE","UNITY","UNTIL","UPPER","UPSET","URBAN","USUAL","UTTER","VALID","VALOR","VALUE","VALVE","VAULT","VENUE","VERSE","VIDEO","VIGOR","VINYL","VIOLA","VIPER","VISIT","VISTA","VITAL","VIVID","VOCAL","VOICE","VOTER","WAGON","WASTE","WATCH","WATER","WEARY","WEAVE","WEDGE","WEIGH","WEIRD","WHEAT","WHEEL","WHERE","WHICH","WHILE","WHITE","WHOLE","WIDER","WITCH","WOMAN","WORLD","WORST","WORTH","WOUND","WRATH","WRECK","WRIST","WRITE","WRONG","WROTE","YIELD","YOUNG","YOUTH","ZEBRA"]
+};
+
+const CATEGORIES = [
+  "Band Name", "Video Game", "Secret Society", "Breakfast Cereal",
+  "Wrestling Move", "Cocktail", "Reality TV Show", "Space Mission",
+  "Dating App", "Yoga Pose", "Pickup Truck Model", "Perfume",
+  "Dog Breed", "Conspiracy Theory", "Ice Cream Flavor", "Rock Band",
+  "Martial Art", "Superhero", "Dance Move", "Spy Agency",
+  "Pizza Topping Combo", "Horror Movie", "Self-Help Book",
+  "Power Tool", "Workout Routine", "Haunted House",
+  "Roller Coaster", "Boy Band", "Food Truck",
+  "Country Song", "Podcast", "Cult Classic Film"
+];
+
+// ═══════════════════════════════════════
+//         STATE & URL ENCODING
+// ═══════════════════════════════════════
+let game = { acronym: "", p1CatForP2: "", p2CatForP1: "", p1Name: "", p2Name: "", round: 1 };
+
+function encode(obj) {
+  return btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
+}
+function decode(str) {
+  try { return JSON.parse(decodeURIComponent(escape(atob(str)))); } catch(e) { return null; }
+}
+
+function buildLink(data) {
+  const base = window.location.href.split('?')[0].split('#')[0];
+  return base + '?g=' + encode(data);
+}
+
+// ═══════════════════════════════════════
+//            SHARED HELPERS
+// ═══════════════════════════════════════
+function pickAcronym() {
+  const lengths = [3, 3, 3, 4, 4, 4, 4, 5, 5];
+  const len = lengths[Math.floor(Math.random() * lengths.length)];
+  const pool = WORDS[len];
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pickCategories() {
+  return shuffleArray(CATEGORIES).slice(0, 6);
+}
+
+function renderAcronym(id, word) {
+  const el = document.getElementById(id);
+  el.innerHTML = "";
+  for (const ch of word) {
+    const d = document.createElement("div");
+    d.className = "acronym-letter";
+    d.textContent = ch;
+    el.appendChild(d);
+  }
+}
+
+function renderHints(id, word) {
+  const el = document.getElementById(id);
+  el.innerHTML = "";
+  for (const ch of word) {
+    const d = document.createElement("div");
+    d.className = "letter-hint";
+    d.innerHTML = `<span class="ltr">${ch}</span><span>____</span>`;
+    el.appendChild(d);
+  }
+}
+
+function renderCats(gridId, btnId, cats) {
+  const grid = document.getElementById(gridId);
+  grid.innerHTML = "";
+  const btn = document.getElementById(btnId);
+  btn.disabled = true;
+  let sel = null;
+  cats.forEach(cat => {
+    const chip = document.createElement("div");
+    chip.className = "chip";
+    chip.textContent = cat;
+    chip.onclick = () => {
+      if (sel) sel.classList.remove("selected");
+      chip.classList.add("selected");
+      sel = chip;
+      btn.disabled = false;
+      btn.dataset.value = cat;
+    };
+    grid.appendChild(chip);
+  });
+}
+
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  const s = document.getElementById(id);
+  void s.offsetWidth;
+  s.classList.add("active");
+  window.scrollTo(0, 0);
+}
+
+function goHome() {
+  history.replaceState(null, '', window.location.pathname);
+  showScreen('screen-title');
+}
+
+function formatDots(w) { return w.split("").join(".") + "."; }
+
+function wireInput(inputId, btnId) {
+  document.getElementById(inputId).addEventListener("input", function() {
+    document.getElementById(btnId).disabled = this.value.trim().length === 0;
+  });
+}
+
+// ═══════════════════════════════════════
+//           SHARE / COPY
+// ═══════════════════════════════════════
+function copyShareLink(boxId) {
+  const url = document.getElementById(boxId).textContent;
+  navigator.clipboard.writeText(url).then(() => {
+    const toast = document.getElementById("copied-toast");
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 1800);
+  });
+}
+
+function nativeShare(boxId) {
+  const url = document.getElementById(boxId).textContent;
+  if (navigator.share) {
+    navigator.share({ title: "ACRONAME", text: "Play ACRONAME with me!", url: url }).catch(() => {});
+  } else {
+    copyShareLink(boxId);
+  }
+}
+
+// ═══════════════════════════════════════
+//         REMOTE PLAY FLOW
+// ═══════════════════════════════════════
+
+// Step 1: P1 starts a new game
+function startRemoteP1() {
+  game.acronym = pickAcronym();
+  history.replaceState(null, '', window.location.pathname);
+  renderAcronym("r-p1-acronym", game.acronym);
+  renderCats("r-p1-cats", "r-p1-cat-btn", pickCategories());
+  showScreen("screen-r-p1-category");
+}
+
+// Step 2: P1 locks in category for P2, gets share link
+function remoteP1ConfirmCat() {
+  game.p1CatForP2 = document.getElementById("r-p1-cat-btn").dataset.value;
+  const link = buildLink({ s: 2, a: game.acronym, c2: game.p1CatForP2 });
+  document.getElementById("r-p1-share-url").textContent = link;
+  showScreen("screen-r-p1-share");
+}
+
+// Step 3: P2 opens link, picks category for P1, writes their name
+function loadP2Turn(data) {
+  game.acronym = data.a;
+  game.p1CatForP2 = data.c2;
+
+  renderAcronym("r-p2-acronym", game.acronym);
+  document.getElementById("r-p2-my-cat").textContent = game.p1CatForP2;
+  renderCats("r-p2-cats", "r-p2-cat-btn", pickCategories());
+  showScreen("screen-r-p2-turn");
+}
+
+let p2SelectedCat = "";
+function remoteP2ShowInput() {
+  p2SelectedCat = document.getElementById("r-p2-cat-btn").dataset.value;
+  game.p2CatForP1 = p2SelectedCat;
+
+  document.getElementById("r-p2-cat-label").textContent = game.p1CatForP2.toUpperCase();
+  renderAcronym("r-p2-input-acronym", game.acronym);
+  renderHints("r-p2-hints", game.acronym);
+  document.getElementById("r-p2-name").value = "";
+  document.getElementById("r-p2-submit-btn").disabled = true;
+  showScreen("screen-r-p2-input");
+  setTimeout(() => document.getElementById("r-p2-name").focus(), 400);
+}
+
+function remoteP2Submit() {
+  game.p2Name = document.getElementById("r-p2-name").value.trim();
+  const link = buildLink({ s: 3, a: game.acronym, c2: game.p1CatForP2, c1: game.p2CatForP1, n2: game.p2Name });
+  document.getElementById("r-p2-share-url").textContent = link;
+  showScreen("screen-r-p2-share");
+}
+
+// Step 4: P1 opens return link, writes their name
+function loadP1Input(data) {
+  game.acronym = data.a;
+  game.p1CatForP2 = data.c2;
+  game.p2CatForP1 = data.c1;
+  game.p2Name = data.n2;
+
+  document.getElementById("r-p1-cat-label").textContent = game.p2CatForP1.toUpperCase();
+  renderAcronym("r-p1-input-acronym", game.acronym);
+  renderHints("r-p1-hints", game.acronym);
+  document.getElementById("r-p1-name").value = "";
+  document.getElementById("r-p1-submit-btn").disabled = true;
+  showScreen("screen-r-p1-input");
+  setTimeout(() => document.getElementById("r-p1-name").focus(), 400);
+}
+
+// Step 5: P1 submits → sees reveal + gets share link for P2
+function remoteP1Submit() {
+  game.p1Name = document.getElementById("r-p1-name").value.trim();
+
+  document.getElementById("rr-p1-cat").textContent = game.p2CatForP1.toUpperCase();
+  document.getElementById("rr-p1-name").textContent = game.p1Name;
+  document.getElementById("rr-p1-acro").textContent = formatDots(game.acronym);
+  document.getElementById("rr-p2-cat").textContent = game.p1CatForP2.toUpperCase();
+  document.getElementById("rr-p2-name").textContent = game.p2Name;
+  document.getElementById("rr-p2-acro").textContent = formatDots(game.acronym);
+
+  const revealLink = buildLink({ s: 4, a: game.acronym, c2: game.p1CatForP2, c1: game.p2CatForP1, n2: game.p2Name, n1: game.p1Name });
+  document.getElementById("r-reveal-share-url").textContent = revealLink;
+
+  showScreen("screen-r-p1-reveal");
+  launchConfetti();
+}
+
+// Step 6: P2 opens reveal link
+function loadP2Reveal(data) {
+  game.acronym = data.a;
+
+  document.getElementById("rr2-p1-cat").textContent = data.c1.toUpperCase();
+  document.getElementById("rr2-p1-name").textContent = data.n1;
+  document.getElementById("rr2-p1-acro").textContent = formatDots(data.a);
+  document.getElementById("rr2-p2-cat").textContent = data.c2.toUpperCase();
+  document.getElementById("rr2-p2-name").textContent = data.n2;
+  document.getElementById("rr2-p2-acro").textContent = formatDots(data.a);
+
+  showScreen("screen-r-p2-reveal");
+  launchConfetti();
+}
+
+// ═══════════════════════════════════════
+//          LOCAL PLAY FLOW
+// ═══════════════════════════════════════
+let localState = { acronym: "", p1CatForP2: "", p2CatForP1: "", p1Name: "", p2Name: "", round: 1 };
+
+function startLocalGame() {
+  localState.acronym = pickAcronym();
+  renderAcronym("l-acronym-display", localState.acronym);
+  document.getElementById("l-acronym-word").textContent = `"${localState.acronym}"`;
+  renderCats("l-p1-cats", "l-p1-cat-btn", pickCategories());
+  renderCats("l-p2-cats", "l-p2-cat-btn", pickCategories());
+  showScreen("screen-local-start");
+}
+
+// Auto-start local when tapped
+document.querySelector('[onclick="showScreen(\'screen-local-start\')"]').onclick = function() { startLocalGame(); };
+
+function localP1Cat() {
+  localState.p1CatForP2 = document.getElementById("l-p1-cat-btn").dataset.value;
+  showScreen("screen-l-pass-p2");
+}
+function localP2Cat() {
+  localState.p2CatForP1 = document.getElementById("l-p2-cat-btn").dataset.value;
+  showScreen("screen-l-pass-p1-input");
+}
+function localShowP1Input() {
+  document.getElementById("l-p1-cat-label").textContent = localState.p2CatForP1.toUpperCase();
+  renderAcronym("l-p1-acro-display", localState.acronym);
+  renderHints("l-p1-hints", localState.acronym);
+  document.getElementById("l-p1-name").value = "";
+  document.getElementById("l-p1-sub-btn").disabled = true;
+  showScreen("screen-l-p1-input");
+  setTimeout(() => document.getElementById("l-p1-name").focus(), 400);
+}
+function localP1Submit() {
+  localState.p1Name = document.getElementById("l-p1-name").value.trim();
+  showScreen("screen-l-pass-p2-input");
+}
+function localShowP2Input() {
+  document.getElementById("l-p2-cat-label").textContent = localState.p1CatForP2.toUpperCase();
+  renderAcronym("l-p2-acro-display", localState.acronym);
+  renderHints("l-p2-hints", localState.acronym);
+  document.getElementById("l-p2-name").value = "";
+  document.getElementById("l-p2-sub-btn").disabled = true;
+  showScreen("screen-l-p2-input");
+  setTimeout(() => document.getElementById("l-p2-name").focus(), 400);
+}
+function localP2Submit() {
+  localState.p2Name = document.getElementById("l-p2-name").value.trim();
+  document.getElementById("lr-p1-cat").textContent = localState.p2CatForP1.toUpperCase();
+  document.getElementById("lr-p1-name").textContent = localState.p1Name;
+  document.getElementById("lr-p1-acro").textContent = formatDots(localState.acronym);
+  document.getElementById("lr-p2-cat").textContent = localState.p1CatForP2.toUpperCase();
+  document.getElementById("lr-p2-name").textContent = localState.p2Name;
+  document.getElementById("lr-p2-acro").textContent = formatDots(localState.acronym);
+  showScreen("screen-l-reveal");
+  launchConfetti();
+}
+function localPlayAgain() {
+  localState.round++;
+  startLocalGame();
+}
+
+// ═══════════════════════════════════════
+//        INPUT WIRING & REACTIONS
+// ═══════════════════════════════════════
+wireInput("r-p2-name", "r-p2-submit-btn");
+wireInput("r-p1-name", "r-p1-submit-btn");
+wireInput("l-p1-name", "l-p1-sub-btn");
+wireInput("l-p2-name", "l-p2-sub-btn");
+
+function react(btn, emoji) {
+  btn.classList.remove("popped");
+  void btn.offsetWidth;
+  btn.classList.add("popped");
+  const el = document.createElement("div");
+  el.className = "float-emoji";
+  el.textContent = emoji;
+  const rect = btn.getBoundingClientRect();
+  el.style.left = (rect.left + rect.width / 2 - 16) + "px";
+  el.style.top = (rect.top - 10) + "px";
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1200);
+}
+
+// ═══════════════════════════════════════
+//              CONFETTI
+// ═══════════════════════════════════════
+function launchConfetti() {
+  const canvas = document.getElementById("confetti");
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const colors = ["#ff5eac", "#8b5cf6", "#3b82f6", "#06d6a0", "#ffd166", "#ff6b35"];
+  const pieces = [];
+  for (let i = 0; i < 100; i++) {
+    pieces.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height - canvas.height,
+      w: Math.random() * 8 + 4, h: Math.random() * 6 + 2,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      vy: Math.random() * 3 + 2, vx: (Math.random() - 0.5) * 2,
+      rot: Math.random() * 360, vr: (Math.random() - 0.5) * 10, opacity: 1
+    });
+  }
+  let frame = 0;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let alive = false;
+    pieces.forEach(p => {
+      if (p.opacity <= 0) return;
+      alive = true;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate((p.rot * Math.PI) / 180);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.opacity;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+      p.y += p.vy; p.x += p.vx; p.rot += p.vr;
+      if (frame > 60) p.opacity -= 0.015;
+    });
+    frame++;
+    if (alive) requestAnimationFrame(draw);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  requestAnimationFrame(draw);
+}
+
+// ═══════════════════════════════════════
+//        ROUTE: READ URL ON LOAD
+// ═══════════════════════════════════════
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const g = params.get('g');
+  if (!g) return; // show title screen
+
+  const data = decode(g);
+  if (!data || !data.s) return;
+
+  switch(data.s) {
+    case 2: loadP2Turn(data); break;   // P2 picks cat + writes name
+    case 3: loadP1Input(data); break;  // P1 writes name
+    case 4: loadP2Reveal(data); break; // P2 sees reveal
+    default: break;
+  }
+})();
+</script>
+</body>
+</html>
